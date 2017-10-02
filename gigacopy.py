@@ -2,9 +2,6 @@
 # Allows tracking of copy progress
 
 import os
-from sys import stdout
-
-testDir = "Z:\\HOME\\MFitzgibbon\\V2.9.2"
 
 
 class Gigacopy:
@@ -95,9 +92,3 @@ class Gigacopy:
 				
 			else:
 				self.duplicate_file(src, dst)
-
-
-
-GC = Gigacopy("D:\Traces\BMW", "HERE")
-print(str(GC.directorySize))
-GC.duplicate_directory("D:\Traces\BMW", "HERE")
