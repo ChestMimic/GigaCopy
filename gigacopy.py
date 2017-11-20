@@ -1,8 +1,6 @@
 #  Gigacopy
 # Allows tracking of copy progress
-
 import os
-
 
 class Gigacopy:
 	"""Object responsible for tracking and reporting file copy progress"""
@@ -30,12 +28,13 @@ class Gigacopy:
 		"""If reporting is active, outputs an active progress report"""
 		if self.reporting:
 			prog = (self.progress / self.directorySize) * 100
-			print(str(self.progress) + " of " + str(self.directorySize) + " bytes (" + str(int(prog)) + "%)", end="\r")
+			print(str(int(prog)), end="\r")
 
 
 	def reset_progress(self):
 		"""Return progress to 0"""
 		self.progress = 0
+
 
 	def directory_size(self, target):
 		"""Returns the size of all files in subdirectories
@@ -47,22 +46,12 @@ class Gigacopy:
 		if self.is_available(target):
 			if os.path.isdir(target) and self.dirs:
 				for fps in os.listdir(target):
-					if os.path.isdir(target+"\\"+fps):
-
-
-						total += self.directory_size(target+"\\"+fps)
-					else:
-						total += os.stat(target+"\\"+fps).st_size	
-
+					#Recursively call directory_size on subcontents
+					total += self.directory_size(target+"\\"+fps)
+				return total
 			else:
-				for fps in os.listdir(target):
-					if os.path.isdir(target+"\\"+fps):
-						pass #ignore dirs
-
-						#total += self.directory_size(target+"\\"+fps)
-					else:
-						total += os.stat(target+"\\"+fps).st_size	
-
+				#break recursion on files, cannot be a directory
+				return os.stat(target).st_size
 		return total
 
 
@@ -90,7 +79,6 @@ class Gigacopy:
 		dst -- String representing duplicate file
 		"""
 		file_size = os.stat(src).st_size
-		
 		amnt_copy = 0
 		#print(src)
 		inFP = open(src, 'rb')
@@ -99,8 +87,8 @@ class Gigacopy:
 			chunk = inFP.read(self.chunk_size)
 			outFP.write(chunk)
 			amnt_copy += len(chunk)
-			self.progress += len(chunk)	
-			self.report_progress()
+		self.progress += amnt_copy
+		self.report_progress()
 		inFP.close()
 		outFP.close()
 		return amnt_copy
@@ -129,5 +117,3 @@ class Gigacopy:
 						self.duplicate_directory(src+"\\"+fps, dst+"\\"+fps, self.dirs)
 			else:
 				self.duplicate_file(src, dst)
-
-
