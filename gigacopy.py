@@ -28,7 +28,7 @@ class Gigacopy:
 		"""If reporting is active, outputs an active progress report"""
 		if self.reporting:
 			prog = (self.progress / self.directorySize) * 100
-			print(str(int(prog)), end="\r")
+			print(str(self.progress) + " of " + str(self.directorySize) + " bytes (" + str(int(prog)) + "%)", end="\r")
 
 
 	def reset_progress(self):
@@ -46,12 +46,17 @@ class Gigacopy:
 		if self.is_available(target):
 			if os.path.isdir(target) and self.dirs:
 				for fps in os.listdir(target):
-					#Recursively call directory_size on subcontents
-					total += self.directory_size(target+"\\"+fps)
-				return total
+					if os.path.isdir(target+"\\"+fps):
+						total += self.directory_size(target+"\\"+fps)
+					else:
+						total += os.stat(target+"\\"+fps).st_size	
 			else:
-				#break recursion on files, cannot be a directory
-				return os.stat(target).st_size
+				for fps in os.listdir(target):
+					if os.path.isdir(target+"\\"+fps):
+						pass #ignore dirs
+						#total += self.directory_size(target+"\\"+fps)
+					else:
+						total += os.stat(target+"\\"+fps).st_size	
 		return total
 
 
@@ -87,8 +92,8 @@ class Gigacopy:
 			chunk = inFP.read(self.chunk_size)
 			outFP.write(chunk)
 			amnt_copy += len(chunk)
-		self.progress += amnt_copy
-		self.report_progress()
+			self.progress += len(chunk)	
+			self.report_progress()
 		inFP.close()
 		outFP.close()
 		return amnt_copy
